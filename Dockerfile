@@ -23,11 +23,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the app source code
 COPY app/ .
 
-# Bake models into the image
-# Note: You need to provide HF_TOKEN if models are private
-ARG HF_TOKEN
-ENV HF_TOKEN=${HF_TOKEN}
-RUN python download_models.py
+# Note: You need to provide HF_TOKEN as a build secret in your Space settings
+RUN --mount=type=secret,id=HF_TOKEN huggingface-cli login --token $(cat /run/secrets/HF_TOKEN) && python download_models.py
 
 # Expose the port the app runs on
 EXPOSE 7860
