@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+requests
+loguru
+torch
+transformers
+peft
+bitsandbytes
+accelerate
+pydantic
+python-dotenv
+runpod
+sentence-transformers

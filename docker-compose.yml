@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  maiathon-inference:
+    build: .
+    ports:
+      - "8001:8001"
+    environment:
+      - HF_TOKEN=${HF_TOKEN}
+      - HYBRID_REMOTE_GENERATION=${HYBRID_REMOTE_GENERATION:-true}
+      - REMOTE_ENGINE_URL=${REMOTE_ENGINE_URL}
+    volumes:
+      - ./app:/app
+    # If running on GPU, uncomment the following:
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
