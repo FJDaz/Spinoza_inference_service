@@ -47,6 +47,10 @@ if DEPLOY_ENV == "HF_SPACES":
         
         return result
 
+    if __name__ == "__main__":
+        import uvicorn
+        uvicorn.run(app, host="0.0.0.0", port=7860)
+
 # --- RUNPOD SERVERLESS ---
 elif DEPLOY_ENV == "RUNPOD":
     logger.info("Starting in RunPod Serverless mode.")

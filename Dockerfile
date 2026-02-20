@@ -29,5 +29,8 @@ ARG HF_TOKEN
 ENV HF_TOKEN=${HF_TOKEN}
 RUN python download_models.py
 
+# Expose the port the app runs on
+EXPOSE 7860
+
 # Command to run the new entrypoint
 CMD ["python", "-u", "main.py"]
