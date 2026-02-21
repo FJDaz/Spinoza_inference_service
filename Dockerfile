@@ -27,11 +27,7 @@ COPY app/ .
 RUN mkdir -p /app/cache && chmod -R 777 /app/cache
 
 # Note: You need to provide HF_TOKEN as a build secret in your Space settings
-# We use the login command through the hub CLI directly to handle the token safely
-RUN --mount=type=secret,id=HF_TOKEN \
-    pip install --no-cache-dir huggingface-hub && \
-    huggingface-cli login --token $(cat /run/secrets/HF_TOKEN) && \
-    python download_models.py
+RUN --mount=type=secret,id=HF_TOKEN python download_models.py
 
 # Expose the port the app runs on
 EXPOSE 7860
