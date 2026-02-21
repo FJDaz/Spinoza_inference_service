@@ -1,10 +1,17 @@
-
 import os
+import sys
+
+# Force environment variables before any heavy imports
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["MKL_NUM_THREADS"] = "1"
+
+from loguru import logger
+logger.info("PYTHON SCRIPT STARTING...")
+
 import torch
 from fastapi import FastAPI
 from pydantic import BaseModel
 import runpod
-from loguru import logger
 
 # Import the core logic from your existing handler
 from handler import load_models, handler as core_handler
@@ -15,6 +22,8 @@ from handler import load_models, handler as core_handler
 IS_HF = os.getenv("SPACE_ID") is not None
 DEFAULT_ENV = "HF_SPACES" if IS_HF else "RUNPOD"
 DEPLOY_ENV = os.getenv("DEPLOY_ENVIRONMENT", DEFAULT_ENV).upper()
+
+logger.info(f"Detected Environment: {DEPLOY_ENV}")
 
 
 # --- HUGGING FACE SPACES App (FastAPI) ---

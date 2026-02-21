@@ -35,5 +35,7 @@ RUN --mount=type=secret,id=inference_space \
 # Expose the port the app runs on
 EXPOSE 7860
 
-# Command to run the new entrypoint
+# Command to run the entrypoint. 
+# We use a shell script style to handle the environment variable logic if needed,
+# but a direct python call with unbuffered output is usually best.
 CMD ["python", "-u", "main.py"]
