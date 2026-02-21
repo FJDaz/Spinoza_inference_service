@@ -11,8 +11,10 @@ from handler import load_models, handler as core_handler
 
 # --- ENVIRONMENT SWITCH ---
 # Decide which environment to run based on an environment variable.
-# Defaults to RUNPOD if not set.
-DEPLOY_ENV = os.getenv("DEPLOY_ENVIRONMENT", "RUNPOD").upper()
+# Automatically detect HF Spaces via standard HF variables if not set.
+IS_HF = os.getenv("SPACE_ID") is not None
+DEFAULT_ENV = "HF_SPACES" if IS_HF else "RUNPOD"
+DEPLOY_ENV = os.getenv("DEPLOY_ENVIRONMENT", DEFAULT_ENV).upper()
 
 
 # --- HUGGING FACE SPACES App (FastAPI) ---

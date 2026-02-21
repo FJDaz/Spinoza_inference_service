@@ -39,16 +39,28 @@ def load_models():
             logger.info("Loading BERT Vigilance...")
             CLASSIFIER = pipeline("text-classification", model=BERT_MODEL_NAME, device=0)
         
+        # Common config for 4-bit quantization
+        bnb_config = BitsAndBytesConfig(
+            load_in_4bit=True, 
+            bnb_4bit_compute_dtype=torch.float16,
+            bnb_4bit_quant_type="nf4",
+            bnb_4bit_use_double_quant=True
+        )
+
         # 2. Load 3B (Sovereign Core)
         if MODELS["3b"]["model"] is None:
             logger.info("Loading Llama 3B...")
-            bnb_config = BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_compute_dtype=torch.float16)
             MODELS["3b"]["tokenizer"] = AutoTokenizer.from_pretrained(LLAMA_3B_NAME)
             MODELS["3b"]["model"] = AutoModelForCausalLM.from_pretrained(
                 LLAMA_3B_NAME, 
                 quantization_config=bnb_config, 
-                device_map="auto"
+                device_map="auto",
+                torch_dtype=torch.float16,
+                low_cpu_mem_usage=True
             )
+        
+        # Clear cache before loading the next big model
+        torch.cuda.empty_cache()
         
         # 3. Load 7B (Expert)
         if MODELS["7b"]["model"] is None:
@@ -57,7 +69,9 @@ def load_models():
             MODELS["7b"]["model"] = AutoModelForCausalLM.from_pretrained(
                 SPINOZA_7B_NAME, 
                 quantization_config=bnb_config, 
-                device_map="auto"
+                device_map="auto",
+                torch_dtype=torch.float16,
+                low_cpu_mem_usage=True
             )
         
         LOCAL_AVAILABLE = True
@@ -65,6 +79,8 @@ def load_models():
     except Exception as e:
         logger.error(f"Error loading local models: {e}. Falling back to remote if configured.")
         LOCAL_AVAILABLE = False
+        # Final attempt to free memory if load failed
+        torch.cuda.empty_cache()
 
 def remote_inference(message, persona, intent):
     """Fallback function to call a remote API (e.g., RunPod)"""
