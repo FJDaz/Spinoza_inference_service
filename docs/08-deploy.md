@@ -16,7 +16,15 @@
 
 ## Déploiement Humain sur Hugging Face Spaces
 
-### 1. Configuration des Secrets (CRITIQUE)
+### 1. Synchronisation du Code (Déclencheur de Build)
+Hugging Face Spaces re-construit votre conteneur à chaque fois que vous poussez sur sa branche `main`.
+Si vous avez configuré le Space comme un remote git (souvent nommé `hf`), utilisez :
+```bash
+git push hf main
+```
+*Si vous utilisez une synchro automatique depuis GitHub, assurez-vous que votre push GitHub est bien passé.*
+
+### 2. Configuration des Secrets (CRITIQUE)
 **C'est l'étape essentielle pour que le build fonctionne :**
 
 - Allez dans les **Settings** de votre Space sur Hugging Face.
