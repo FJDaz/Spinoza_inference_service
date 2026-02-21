@@ -26,8 +26,8 @@ COPY app/ .
 # Create cache directory and set permissions
 RUN mkdir -p /app/cache && chmod -R 777 /app/cache
 
-# Note: You need to provide HF_TOKEN as a build secret in your Space settings
-RUN --mount=type=secret,id=HF_TOKEN python download_models.py
+# Note: You need to provide inference_space as a build secret in your Space settings
+RUN --mount=type=secret,id=inference_space python download_models.py
 
 # Expose the port the app runs on
 EXPOSE 7860
