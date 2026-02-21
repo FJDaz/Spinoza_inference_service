@@ -31,7 +31,7 @@ def download():
             print("Successfully logged into Hugging Face Hub.")
         except Exception as e:
             print(f"❌ Login failed: {e}")
-            print("Will attempt to download without authentication...")
+            print("Proceeding without authentication (this might fail for gated models)...")
     else:
         print("Warning: No HF_TOKEN found in environment or secrets.")
 
