@@ -1,5 +1,9 @@
-from huggingface_hub import login, snapshot_download
 import os
+# Force OMP_NUM_THREADS to 1 before any other imports to fix libgomp error
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["MKL_NUM_THREADS"] = "1"
+
+from huggingface_hub import login, snapshot_download
 
 # CONFIG
 BERT_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"

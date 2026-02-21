@@ -29,7 +29,8 @@ COPY app/ .
 RUN mkdir -p /app/cache && chmod -R 777 /app/cache
 
 # Note: You need to provide inference_space as a build secret in your Space settings
-RUN --mount=type=secret,id=inference_space python download_models.py
+RUN --mount=type=secret,id=inference_space \
+    OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 python download_models.py
 
 # Expose the port the app runs on
 EXPOSE 7860
