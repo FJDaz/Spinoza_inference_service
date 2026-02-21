@@ -2,6 +2,7 @@ fastapi
 uvicorn[standard]
 requests
 loguru
+filelock>=3.12.0
 torch
 transformers
 peft
