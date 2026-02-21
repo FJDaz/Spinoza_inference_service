@@ -12,15 +12,28 @@ SPINOZA_7B_NAME = "mistralai/Mistral-7B-Instruct-v0.2"
 def download():
     # Attempt to login if HF_TOKEN is provided (for build secrets)
     hf_token = os.getenv("HF_TOKEN")
+    source = "Environment Variable"
+    
     if not hf_token and os.path.exists("/run/secrets/HF_TOKEN"):
-        with open("/run/secrets/HF_TOKEN", "r") as f:
-            hf_token = f.read().strip()
+        try:
+            with open("/run/secrets/HF_TOKEN", "r") as f:
+                hf_token = f.read().strip()
+                source = "Build Secret (/run/secrets/HF_TOKEN)"
+        except Exception as e:
+            print(f"Error reading secret file: {e}")
     
     if hf_token:
-        print("Logging into Hugging Face Hub...")
-        login(token=hf_token)
+        # Masked token for debugging
+        masked = hf_token[:4] + "..." + hf_token[-4:] if len(hf_token) > 8 else "****"
+        print(f"Attempting login using token from {source} (Token: {masked})")
+        try:
+            login(token=hf_token)
+            print("Successfully logged into Hugging Face Hub.")
+        except Exception as e:
+            print(f"❌ Login failed: {e}")
+            print("Will attempt to download without authentication...")
     else:
-        print("Warning: No HF_TOKEN found. Some models may not be accessible.")
+        print("Warning: No HF_TOKEN found in environment or secrets.")
 
     print(f"Downloading {BERT_MODEL_NAME}...")
     SentenceTransformer(BERT_MODEL_NAME)
