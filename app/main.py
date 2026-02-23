@@ -31,6 +31,10 @@ if DEPLOY_ENV == "HF_SPACES":
     logger.info("Starting in Hugging Face Spaces mode (FastAPI server).")
     
     app = FastAPI()
+    @app.get("/")
+    async def root():
+        return {"status": "online", "message": "Spinoza Inference Container is running. Use /inference for POST requests."}
+
 
     class HandlerInput(BaseModel):
         """Pydantic model for the input to the handler"""
