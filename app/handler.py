@@ -122,7 +122,7 @@ def remote_inference(message, persona, intent):
 def handler(event):
     """Core Hybrid Inference Handler"""
     input_data = event.get("input", {})
-    message = input_data.get("message", "")
+    message = input_data.get("message") or input_data.get("prompt", "")
     persona = input_data.get("persona", "Spinoza")
     
     if not message:
