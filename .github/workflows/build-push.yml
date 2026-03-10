@@ -23,4 +23,6 @@ jobs:
         with:
           context: .
           push: true
-          tags: fjdaz/homeos:spinoza-inference
+          tags: |
+            fjdaz/homeos:spinoza-inference
+            fjdaz/homeos:latest
