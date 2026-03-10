@@ -1,6 +1,8 @@
 import os
+import sys
 import threading
 from loguru import logger
+
 from fastapi import FastAPI
 from pydantic import BaseModel
 import runpod
@@ -9,7 +11,7 @@ import runpod
 from handler import load_models, handler as core_handler
 
 # Détection de l environnement
-DEPLOY_ENV = os.getenv("DEPLOY_ENVIRONMENT", "LOCAL").upper()
+DEPLOY_ENV = os.getenv("DEPLOY_ENVIRONMENT", "RUNPOD").upper()
 if os.getenv("SPACE_ID"):
     DEPLOY_ENV = "HF_SPACES"
 

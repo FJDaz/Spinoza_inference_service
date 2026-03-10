@@ -1,41 +1,30 @@
-# Use a PyTorch base image with CUDA support
+# Dockerfile RunPod Serverless - Spinoza Inference (BERT + 3B + 7B)
+# Base pytorch/pytorch : CUDA 12.1 pré-installé, build confirmé OK dans les logs
 FROM pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime
 
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 ENV HUGGINGFACE_HUB_CACHE=/app/cache
 ENV OMP_NUM_THREADS=1
 ENV MKL_NUM_THREADS=1
 
-# Set the working directory
 WORKDIR /app
 
-# Install system dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
     curl \
     git \
+    libgomp1 \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the app source code
+# torch/CUDA déjà dans l'image de base — installe uniquement le reste
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
 COPY app/ .
 
-# Create cache directory and set permissions
 RUN mkdir -p /app/cache && chmod -R 777 /app/cache
 
-# Note: You need to provide inference_space as a build secret in your Space settings
-RUN --mount=type=secret,id=inference_space \
-    OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 python download_models.py
-
-# Expose the port the app runs on
-EXPOSE 7860
-
-# Command to run the entrypoint. 
-# We use a shell script style to handle the environment variable logic if needed,
-# but a direct python call with unbuffered output is usually best.
 CMD ["python", "-u", "main.py"]
