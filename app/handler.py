@@ -1,5 +1,6 @@
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig, pipeline
+from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
+from sentence_transformers import SentenceTransformer, util
 import os
 import requests
 from loguru import logger
@@ -13,8 +14,17 @@ SPINOZA_7B_NAME = "mistralai/Mistral-7B-Instruct-v0.2"
 HYBRID_REMOTE = os.getenv("HYBRID_REMOTE_GENERATION", "false").lower() == "true"
 REMOTE_URL = os.getenv("REMOTE_ENGINE_URL")
 
+# Intent anchors pour cosine similarity
+INTENT_ANCHORS = {
+    "accord":     ["oui", "je suis d'accord", "exactement", "tout à fait", "voilà", "c'est juste", "ok"],
+    "confusion":  ["je comprends pas", "c'est quoi", "pourquoi", "je vois pas le rapport", "je sais pas", "c'est flou", "explique"],
+    "resistance": ["non", "pas d'accord", "c'est faux", "n'importe quoi", "je refuse", "je peux pas", "c'est contradictoire"],
+    "neutre":     ["bonjour", "raconte-moi", "dis-moi", "alors", "intéressant", "je t'écoute"],
+}
+
 # Global objects for caching
-CLASSIFIER = None
+BERT_MODEL = None
+ANCHOR_EMBEDDINGS = {}
 MODELS = {
     "3b": {"model": None, "tokenizer": None},
     "7b": {"model": None, "tokenizer": None}
@@ -34,10 +44,14 @@ def load_models():
         return
 
     try:
-        # 1. Load BERT (Vigilance)
-        if CLASSIFIER is None:
-            logger.info("Loading BERT Vigilance...")
-            CLASSIFIER = pipeline("text-classification", model=BERT_MODEL_NAME, device=0)
+        # 1. Load BERT (Semantic Intent Router)
+        if BERT_MODEL is None:
+            logger.info("Loading BERT Semantic Router...")
+            BERT_MODEL = SentenceTransformer(BERT_MODEL_NAME)
+            BERT_MODEL = BERT_MODEL.to("cuda")
+            for intent, phrases in INTENT_ANCHORS.items():
+                ANCHOR_EMBEDDINGS[intent] = BERT_MODEL.encode(phrases, convert_to_tensor=True)
+            logger.info("BERT Intent Router ready.")
         
         # Common config for 4-bit quantization
         bnb_config = BitsAndBytesConfig(
@@ -128,16 +142,17 @@ def handler(event):
     if not message:
         return {"error": "No message provided"}
 
-    # --- STEP 1: INTENT DETECTION ---
-    # We use a default if BERT isn't loaded locally
+    # --- STEP 1: INTENT DETECTION (BERT cosine similarity) ---
     intent = "neutre"
-    if CLASSIFIER:
+    if BERT_MODEL and ANCHOR_EMBEDDINGS:
         try:
-            analysis = CLASSIFIER(message)[0]
-            label = analysis["label"].upper()
-            if label == "PERFORMANCE_LEAP": intent = "accord"
-            elif label in ["OPPORTUNITY", "NOISE"]: intent = "confusion"
-            elif label == "PRICE_ALERT": intent = "resistance"
+            msg_emb = BERT_MODEL.encode(message, convert_to_tensor=True)
+            scores = {
+                k: util.cos_sim(msg_emb, v).max().item()
+                for k, v in ANCHOR_EMBEDDINGS.items()
+            }
+            intent = max(scores, key=scores.get)
+            logger.info(f"[BERT Intent] '{message[:40]}' → {intent} | {scores}")
         except Exception as e:
             logger.warning(f"Intent detection failed: {e}")
 
