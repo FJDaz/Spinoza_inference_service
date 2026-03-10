@@ -36,7 +36,7 @@ def load_models():
     Attempt to load models locally. If CUDA is not available or an error occurs,
     mark LOCAL_AVAILABLE as False and proceed (allowing remote fallback).
     """
-    global CLASSIFIER, MODELS, LOCAL_AVAILABLE
+    global BERT_MODEL, ANCHOR_EMBEDDINGS, MODELS, LOCAL_AVAILABLE
     
     if not torch.cuda.is_available():
         logger.warning("No CUDA detected. Local inference disabled, switching to Remote Fallback mode.")
