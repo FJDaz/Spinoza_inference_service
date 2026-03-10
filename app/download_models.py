@@ -31,14 +31,16 @@ def download():
             print(f"❌ Login failed: {e}")
 
     # Use snapshot_download to only download files to cache without loading into RAM
-    print(f"Downloading {BERT_MODEL_NAME}...")
-    snapshot_download(repo_id=BERT_MODEL_NAME)
+    cache_dir = os.getenv("HUGGINGFACE_HUB_CACHE", "/app/cache")
     
-    print(f"Downloading {LLAMA_3B_NAME}...")
-    snapshot_download(repo_id=LLAMA_3B_NAME, token=hf_token)
+    print(f"Downloading {BERT_MODEL_NAME} to {cache_dir}...")
+    snapshot_download(repo_id=BERT_MODEL_NAME, cache_dir=cache_dir)
     
-    print(f"Downloading {SPINOZA_7B_NAME}...")
-    snapshot_download(repo_id=SPINOZA_7B_NAME, token=hf_token)
+    print(f"Downloading {LLAMA_3B_NAME} to {cache_dir}...")
+    snapshot_download(repo_id=LLAMA_3B_NAME, token=hf_token, cache_dir=cache_dir)
+    
+    print(f"Downloading {SPINOZA_7B_NAME} to {cache_dir}...")
+    snapshot_download(repo_id=SPINOZA_7B_NAME, token=hf_token, cache_dir=cache_dir)
     
     print("✅ All models downloaded to cache!")
 
