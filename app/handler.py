@@ -168,7 +168,13 @@ def handler(event):
 
             prompt = f"System: Tu es {persona}. Intent: {intent}\nUser: {message}\nAssistant:"
             inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
-            output = model.generate(**inputs, max_new_tokens=250, temperature=0.7)
+            output = model.generate(
+                **inputs,
+                max_new_tokens=250,
+                do_sample=True,
+                temperature=0.7,
+                pad_token_id=tokenizer.eos_token_id
+            )
             response = tokenizer.decode(output[0], skip_special_tokens=True).split("Assistant:")[-1].strip()
 
             return {
